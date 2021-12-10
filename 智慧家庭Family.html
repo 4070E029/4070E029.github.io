@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧家庭</title>
+    <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        p{ font-size:17px} 
+        body {
+            font-family: "微軟正黑體", "黑體-繁", sans-serif;
+            background-image: url("img/house.jpg");
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 280px;  /* 指定高度 */
+        background-size: cover;
+        background-attachment: fixed;
+        }
+    </style>
+</head>
+
+
+    
+<body>
+    <h1><font color="blue">智慧家庭設備控制網頁</font></h1>
+    <button style="width:150px;height:50px;font-size:20px;background-color:red;" id="connBtn">連接藍牙設備</button>
+    <p><font size="5">裝置名稱：<span id="deviceName"></span></font></p>
+    <p><font size="5">控制設備：<label id = "device"></label></font></p>
+
+        <P><font size="5">電燈開關：</font>
+        <div id="LED_SW">
+            <input type="radio" onclick="changeLED_ON()" id="LED_ON"  disabled class="SW"  value="電燈開啟"  name="SW" >
+            <label for="LED_ON">開啟<img src="img/lamp.JPG"width="40" height="40"></label>
+            <input type="radio" onclick="changeLED_OFF()" id="LED_OFF"  disabled class="SW"  checked="checked" value="電燈關閉"  name="SW">
+            <label for="LED_OFF">關閉<img src="img/lamp-off.JPG"width="40" height="40"></label></P>
+        </div>
+        <P><font size="5">風扇開關：</font>
+        <div id="FAN_SW">
+            <input type="radio" onclick="changeFAN_ON()" id="FAN_ON" disabled class="SW" value="風扇開啟" name="SW">
+            <label for="FAN_ON">開啟<img src="img/fan-on.JPG"width="40" height="40"></label>
+            <input type="radio" onclick="changeFAN_OFF()" id="FAN_OFF" disabled class="SW" checked="checked" value="風扇關閉" name="SW">
+            <label for="FAN_OFF">關閉<img src="img/fan-off.JPG"width="40" height="40"></label></P>
+        </div>
+        <P><font size="5">風速調整:</font>
+        <div id="FAN_HIGHT_LOW_SW">
+            <input type="radio" onclick="changeFAN_HIGHT()" id="FAN_HIGHT" disabled class="SW" value="提高風速" name="SW">
+            <label for="FAN_HIGHT">提高風速<img src="img/fan-on.JPG"width="40" height="40"></label>
+            <input type="radio" onclick="changeFAN_LOW()" id="FAN_LOW" disabled class="SW" value="降低風速" name="SW">
+            <label for="FAN_LOW">降低風速<img src="img/fan-on.JPG"width="40" height="40"></label></P>
+        </div>
+        <P><font size="5">大門控制：</font>
+        <div id="DOOR_SW">
+            <input type="radio" onclick="changeDOOR_ON()" id="DOOR_ON" disabled class="SW" value="芝麻開門" name="SW">
+            <label for="DOOR_ON">芝麻開門<img src="img/door.JPG"width="40" height="40"></label>
+            <input type="radio" onclick="changeDOOR_OFF()" id="DOOR_OFF" disabled class="SW" checked="checked" value="芝麻關門" name="SW">
+            <label for="DOOR_OFF">芝麻關門<img src="img/door-closed.JPG"width="40" height="40"></label></P>
+        </div>
+        <P><font size="5">現在亮度：</font>
+        <div id="LIGHT_SW">
+            <input type="radio" onclick="changeLIGHT_ON()" id="LIGHT_ON" disabled class="SW" value="現在亮度" name="SW">
+            <label for="LIGHT_ON">現在亮度<img src="img/light.JPG"width="40" height="40"></label>
+            <input type="radio" onclick="changeLIGHT_OFF()" id="LIGHT_OFF" disabled class="SW" value="現在亮度" name="SW">
+            <label for="LIGHT_OFF">現在亮度<img src="img/light.JPG"width="40" height="40"></label></P>
+        </div>
+        <P><font size="5">現在溫度：</font>
+            <div id="temperature_SW">
+                <input type="radio" onclick="changetemperature_ON()" id="temperature_ON" disabled class="SW" value="現在溫度" name="SW">
+                <label for="temperature_ON">現在溫度<img src="img/tem.JPG"width="40" height="40"></label>
+                <input type="radio" onclick="changetemperature_OFF()" id="temperature_OFF" disabled class="SW" value="現在溫度" name="SW">
+                <label for="temperature_OFF">現在溫度<img src="img/tem.JPG"width="40" height="40"></label></P>
+            </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+    <script>
+        const UART_SERVICE = "0000fff0-0000-1000-8000-00805f9b34fb";
+        const RX_UUID = "0000fff2-0000-1000-8000-00805f9b34fb";
+        const TX_UUID = "0000fff1-0000-1000-8000-00805f9b34fb";
+        var BLEDevice = null;
+        var UARTService = null;
+
+        async function connectBLE() {
+            let opt = {
+                filters: [
+				//acceptAllDevices:true
+                    { namePrefix: 'mike' },
+                    { services: [UART_SERVICE] }
+                ],
+                //optionalServices: ['battery_service']
+            }
+
+            try {
+                console.log('請求BLE裝置連線…');
+                BLEDevice = await navigator.bluetooth.requestDevice(opt);
+
+                $('#connBtn').attr('disabled','disabled');
+                //$('#disBtn').removeAttr("disabled");
+                $('#LED_ON').button('enable');
+                $('#LED_OFF').button('enable');
+                $('#FAN_ON').button('enable');
+                $('#FAN_OFF').button('enable');
+                $('#FAN_HIGHT').button('enable');
+                $('#FAN_LOW').button('enable');
+                $('#DOOR_ON').button('enable');
+                $('#DOOR_OFF').button('enable');
+                $('#LIGHT_ON').button('enable');
+                $('#LIGHT_OFF').button('enable');
+                $('#temperature_ON').button('enable');
+                $('#temperature_OFF').button('enable');
+
+
+                console.log('裝置名稱：' + BLEDevice.name);
+                $("#deviceName").text(BLEDevice.name);
+              
+
+                console.log('連接GATT伺服器…');
+                const server = await BLEDevice.gatt.connect();
+                BLEDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+                console.log('取得UART服務…');
+                UARTService = await server.getPrimaryService(UART_SERVICE);
+
+                console.log('取得TX特徵…');
+                const txChar = await UARTService.getCharacteristic(TX_UUID);
+                
+                await txChar.startNotifications();
+
+
+                txChar.addEventListener('characteristicvaluechanged',
+                    e => {
+                        let val = e.target.value;
+                        let str = new TextDecoder("utf-8").decode(val)
+                        //$('#magnet').text(str)
+                    }
+                );
+
+            } catch (err) {
+                console.log('未連接設備' + err);
+            }
+        }
+        
+       function changeLED_ON() { 
+ document.getElementById('device').innerHTML = '電燈開啟'; 
+ } 
+       function changeLED_OFF() { 
+ document.getElementById('device').innerHTML = '電燈關閉'; 
+ } 
+       function changeFAN_ON() { 
+ document.getElementById('device').innerHTML = '風扇開啟'; 
+ } 
+       function changeFAN_OFF() { 
+ document.getElementById('device').innerHTML = '風扇關閉'; 
+ } 
+       function changeFAN_HIGHT() { 
+ document.getElementById('device').innerHTML = '風速提高'; 
+ } 
+       function changeFAN_LOW() { 
+ document.getElementById('device').innerHTML = '風速降低'; 
+ } 
+       function changeDOOR_ON() { 
+ document.getElementById('device').innerHTML = '大門開啟'; 
+ } 
+       function changeDOOR_OFF() { 
+ document.getElementById('device').innerHTML = '大門關閉'; 
+ } 
+       function changeLIGHT_ON() { 
+ document.getElementById('device').innerHTML = '現在亮度'; 
+ } 
+       function changeLIGHT_OFF() { 
+ document.getElementById('device').innerHTML = '現在亮度'; 
+ } 
+       function changetemperature_ON() { 
+ document.getElementById('device').innerHTML = '現在溫度'; 
+ } 
+       function changetemperature_OFF() { 
+ document.getElementById('device').innerHTML = '現在溫度'; 
+ } 
+
+function UIinit() {
+    $('#connBtn').removeAttr("disabled");  // 啟用「連線」按鈕
+    //$('#disBtn').attr('disabled','disabled');
+    $('#deviceName').text('裝置已斷線');
+    //$('#magnet').text('');
+    $('#device').text('');
+    $('#LED_ON').button('disable');
+    $('#LED_OFF').button('disable');
+    $('#FAN_ON').button('disable');
+    $('#FAN_OFF').button('disable');
+    $('#FAN_HIGHT').button('disable');
+    $('#FAN_LOW').button('disable');
+    $('#DOOR_ON').button('disable');
+    $('#DOOR_OFF').button('disable');
+    $('#LIGHT_ON').button('disable');
+    $('#LIGHT_OFF').button('disable');
+    $('#temperature_ON').button('disable');
+    $('#temperature_OFF').button('disable');
+}
+function onDisconnected(e) {
+    console.log('藍牙連線斷了～');
+    UIinit();
+}
+
+
+
+        $("#connBtn").click((e) => {
+            if (!navigator.bluetooth) {
+                console.log('你的瀏覽器不支援Web Bluetooth API，換一個吧～');
+                return false;
+            }
+
+            connectBLE();
+        });
+
+
+        $("#LED_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("LED: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+        });
+
+        $("#FAN_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("FAN: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+        });
+
+        $("#FAN_HIGHT_LOW_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("FAN_HIGHT: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+        });
+
+        $("#DOOR_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("DOOR: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+        });
+
+        $("#LIGHT_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("LIGHT: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+
+       
+        });
+
+        $("#temperature_SW").buttonset();
+        $(".SW").change(async e => {
+            if (!BLEDevice) {
+                return;
+            }
+            let state = e.target.value;
+            let enc = new TextEncoder();
+            console.log("temperature: " + state);
+            if (BLEDevice.gatt.connected) {
+                const rxChar = await UARTService.getCharacteristic(RX_UUID);
+                rxChar.writeValue(enc.encode(state));
+            } else {
+                return;
+            }
+
+       
+        });
+
+
+
+        
+
+    </script>
+</body>
+
+</html>
