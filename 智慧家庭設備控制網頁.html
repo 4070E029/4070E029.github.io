@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧家庭設備控制網頁family</title>
+    <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+       p{ font-size:17px}
+
+        body {
+            font-family: "微軟正黑體", "黑體-繁", sans-serif;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 280px;
+            /* 指定高度 */
+            background-size: cover;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+
+<body bgcolor="orange">
+
+<body>
+    <h1><font color="blue">智慧家庭設備控制網頁</font></h1>
+    <button style="width:150px;height:50px;font-size:20px;background-color:red;" id="connBtn">連接藍牙設備</button>
+    <button style="width:150px;height:50px;font-size:20px;background-color:yellow;" id="disconnect" disabled onClick='disconnect()'>斷開藍牙設備</button>
+    <p><input type ="button" onclick="javascript:location.href='https://4070e033.github.io/door_lock/index.html'" value="人臉辨識" style="width:150px;height:50px;font-size:20px;background-color:orange;"></input></p>
+    <p><font size="5">裝置名稱：<span id="deviceName"></span></font></p>
+    <p><font size="5">控制設備：<label id = "device"></label></font></p>
+
+        <P><font size="5">電燈開關：</font>
+        <div id="LED_SW">
+            <input type="radio"  id="LED_ON"  disabled class="SW"  value="light on"  name="SW" >
+            <label for="LED_ON">開啟</label>
+            <input type="radio"   id="LED_OFF"  disabled class="SW"  checked="checked" value="light off"  name="SW">
+            <label for="LED_OFF">關閉</label></P>
+        </div>
+        <P><font size="5">風扇開關：</font>
+        <div id="FAN_SW">
+            <input type="radio"  id="FAN_ON" disabled class="SW" value="fan on" name="SW">
+            <label for="FAN_ON">開啟</label>
+            <input type="radio"  id="FAN_OFF" disabled class="SW" checked="checked" value="fan off" name="SW">
+            <label for="FAN_OFF">關閉</label></P>
+        </div>
+        <P><font size="5">風速調整:</font>
+        <div id="FAN_HIGHT_LOW_SW">
+            <input type="radio"  id="FAN_HIGHT" disabled class="SW" value="fan hight" name="SW">
+            <label for="FAN_HIGHT">提高風速</label>
+            <input type="radio"   id="FAN_LOW" disabled class="SW" checked="checked" value="fan low" name="SW">
+            <label for="FAN_LOW">降低風速</label></P>
+        </div>
+        <P><font size="5">大門控制：</font>
+        <div id="DOOR_SW">
+            <input type="radio"  id="DOOR_ON" disabled class="SW" value="open door" name="SW">
+            <label for="DOOR_ON">芝麻開門</label>
+            <input type="radio"  id="DOOR_OFF" disabled class="SW" checked="checked" value="close door" name="SW">
+            <label for="DOOR_OFF">芝麻關門</label></P>
+        </div>
+        <P><font size="5">現在亮度：</font>
+        <div id="LIGHT_SW">
+            <input type="radio"  id="LIGHT_ON" disabled class="SW" value="now light" name="SW">
+            <label for="LIGHT_ON">現在亮度</label>
+            <input type="radio"  id="LIGHT_OFF" disabled class="SW" checked="checked" value="now light" name="SW">
+            <label for="LIGHT_OFF">現在亮度</label></P>
+        </div>
+        <P><font size="5">現在溫度：</font>
+        <div id="temperature_SW">
+            <input type="radio"  id="temperature_ON" disabled class="SW" value="now temperature" name="SW">
+            <label for="temperature_ON">現在溫度</label>
+            <input type="radio"  id="temperature_OFF" disabled class="SW" checked="checked" value="now temperature" name="SW">
+            <label for="temperature_OFF">現在溫度</label></P>
+        </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="script-1.js"></script>
+
+</body>
+
+</html>
